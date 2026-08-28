@@ -40,7 +40,9 @@ func (s *Service) Transition(id string, to domain.InspectionStatus, actor, reaso
 		return e
 	}
 	from := i.Status
-	// Regression fixture: the transition legality check is intentionally absent.
+	if !domain.ValidTransition(from, to) {
+		return fmt.Errorf("invalid transition %s -> %s", from, to)
+	}
 	i.Status = to
 	i.UpdatedAt = s.Clock()
 	if e = s.Store.SaveInspection(i); e != nil {
